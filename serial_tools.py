@@ -3,20 +3,24 @@ import serial.tools.list_ports
 import time
 
 def list_ports():
-    """Lista los puertos seriales disponibles para ayudarte a identificar el correcto."""
+    """
+    List all the ports of the computer
+    :return: list
+    """
     return serial.tools.list_ports.comports()
 
-
-def read_port(puerto, baudrate=115200):
+# TODO: Change the method to return the data as an object
+def read_port(puerto, baud_rate=115200):
     """
-    Abre el puerto serial y lee datos línea por línea del ESP32.
+    Open the serial port and read the data line by line.
 
-    puerto: ej. 'COM3' en Windows, '/dev/ttyUSB0' o '/dev/ttyACM0' en Linux/Mac
-    baudrate: debe coincidir con el Serial.begin() del código del ESP32
+    :param puerto: ie. 'COM3' in Windows, '/dev/ttyUSB0' or '/dev/ttyACM0' in Linux/Mac
+    :param baud_rate: baud rate of the serial port
+    :return: None
     """
     try:
-        ser = serial.Serial(puerto, baudrate, timeout=1)
-        print(f"Conectado a {puerto} a {baudrate} baudios.")
+        ser = serial.Serial(puerto, baud_rate, timeout=1)
+        print(f"Conectado a {puerto} a {baud_rate} baudios.")
         time.sleep(2)  # da tiempo a que el ESP32 reinicie tras abrir el puerto
 
         while True:
@@ -33,4 +37,3 @@ def read_port(puerto, baudrate=115200):
         if 'ser' in locals() and ser.is_open:
             ser.close()
             print("Puerto cerrado.")
-
