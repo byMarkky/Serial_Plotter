@@ -12,11 +12,13 @@ import tkinter.ttk as ttk
 from tkinter.constants import *
 import os.path
 
+from DataWindow import DataWindow
+
 _location = os.path.dirname(__file__)
 
 import window_support
 
-from serial_tools import list_ports
+from serial_tools import list_ports, SerialReader
 from Config import Config
 
 _bgcolor = '#d9d9d9'
@@ -55,6 +57,7 @@ class Toplevel1:
         self.top = top
 
         self.config = Config()
+        self.serial_reader = None
 
         self.Label1 = tk.Label(self.top)
         self.Label1.place(relx=0.096, rely=0.0, height=34, width=79)
@@ -199,6 +202,8 @@ class Toplevel1:
         self.SampleTimeEntry.configure(selectbackground="#d9d9d9")
         self.SampleTimeEntry.configure(selectforeground="black")
 
+        self.top.protocol("WM_DELETE_WINDOW", lambda: self._on_close())
+
     def select_port(self, port):
         self.config.set_port(port)
         self.Menubutton1.configure(text=port)
@@ -215,11 +220,30 @@ class Toplevel1:
         if not self.validate_data():
             print("Revisa los datos, alguno debe estar incorrecto.")
             messagebox.showerror("Error", "Revisa los datos, parece haber datos incorrectos.")
-        else:
-            self.config.set_regex(self.RegexEntry.get())
-            self.config.set_baud_rate(self.BaudTextBox.get())
-            self.config.set_sample_time(self.SampleTimeEntry.get())
-            print(self.config.__str__())
+            return
+
+        self.config.set_regex(self.RegexEntry.get())
+        self.config.set_baud_rate(self.BaudTextBox.get())
+        self.config.set_sample_time(self.SampleTimeEntry.get())
+        print(self.config.__str__())
+
+        try:
+            self.serial_reader = SerialReader(
+                self.config.get_port(),
+                self.config.get_baud_rate()
+            )
+            self.serial_reader.start()
+        except Exception as e:
+            messagebox.showerror("Error de conexion", str(e))
+            return
+
+        self.data_window = DataWindow(self.top, self.serial_reader)
+        self.top.withdraw()
+
+    def _on_close(self):
+        if self.serial_reader:
+            self.serial_reader.stop()
+        self.top.destroy()
 
 def start_up():
     window_support.main()
