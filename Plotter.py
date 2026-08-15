@@ -15,7 +15,7 @@ class Plotter:
         self.data_limit = 20
         self.serial_reader = serial_reader
 
-        self.fig = plt.figure()
+        self.fig = plt.Figure()
         self.ax = self.fig.add_subplot(1, 1, 1)
 
         self.canvas = FigureCanvasTkAgg(self.fig, master=master_frame)

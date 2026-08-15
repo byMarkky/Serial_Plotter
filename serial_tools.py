@@ -63,7 +63,7 @@ class SerialReader:
     def _leer(self):
         while not self._stop_event.is_set():
             try:
-                if self.ser.is_open:
+                if self.ser.in_waiting > 0:
                     linea = self.ser.readline().decode('utf-8', errors='ignore').strip()
                     if linea:
                         temperaturas = self.get_temperatures(linea)
