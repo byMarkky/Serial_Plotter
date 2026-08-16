@@ -4,6 +4,9 @@ import time
 import queue
 import threading
 import re
+import csv
+import datetime as dt
+import os
 
 def list_ports():
     """
@@ -12,7 +15,6 @@ def list_ports():
     """
     return serial.tools.list_ports.comports()
 
-# TODO: Change the method to return the data as an object
 def read_port(puerto, baud_rate=115200):
     """
     Open the serial port and read the data line by line.
@@ -49,9 +51,21 @@ class SerialReader:
         self._stop_event = threading.Event()
         self.ser = None
         self.thread = None
+        self.csv_path = None
+
+        if self.csv_path is None:
+            timestamp = dt.datetime.now().strftime('%Y%m%d_%H%M%S')
+            self.csv_path = f"datos_{timestamp}.csv"
+        self.csv_file = None
+        self.csv_writer = None
 
     def start(self):
         self.ser = serial.Serial(self.puerto, self.baud_rate, timeout=1)
+
+        self.csv_file = open(self.csv_path, 'w', newline='', encoding='utf-8')
+        self.csv_writer = csv.writer(self.csv_file)
+        self.csv_writer.writerow(['timestamp', 'Celda', 'Temperatura'])
+
         self.thread = threading.Thread(target=self._leer, daemon=True)
         self.thread.start()
 
@@ -59,6 +73,12 @@ class SerialReader:
         patron = r'Celda\s+(\d+):\s*(-?\d+\.?\d*)'
         coincidencias = re.findall(patron, linea)
         return {int(num): float(temp) for num, temp in coincidencias}
+
+    def _save_csv(self, temperaturas):
+        timestamp = dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
+        for celda, temp in temperaturas.items():
+            self.csv_writer.writerow([timestamp, f"Celda {celda}", temp])
+        self.csv_file.flush()   # Fuerza la escritura en el disco
 
     def _leer(self):
         while not self._stop_event.is_set():
@@ -68,6 +88,7 @@ class SerialReader:
                     if linea:
                         temperaturas = self.get_temperatures(linea)
                         self.data_queue.put(temperaturas)
+                        self._save_csv(temperaturas)
                         print(temperaturas)
             except serial.SerialException as e:
                 print(f"Error al abrir el puerto: {e}")
@@ -83,3 +104,6 @@ class SerialReader:
         if self.ser and self.ser.is_open:
             self.ser.close()
             print("Puerto serial cerrado (ser)")
+        if self.csv_file:
+            self.csv_file.close()
+            print(f"CSV Guardado en: {os.path.abspath(self.csv_path)}")

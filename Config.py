@@ -6,18 +6,34 @@ class Config:
         self.selected_port = None
         self.baud_rate = 115200
         self.sample_time = -1   # Sample until program is closed
-        self.regex = ""
+        self.regex = r'Celda\s+(\d+):\s*(-?\d+\.?\d*)'
 
     def get_port(self):
+        """
+        Get the selected port
+        :return:
+        """
         return self.selected_port
 
     def get_baud_rate(self):
+        """
+        Get the baud rate, by default is 115200
+        :return:
+        """
         return self.baud_rate
 
     def get_sample_time(self):
+        """
+        Get the sample time, by default is -1 sampling until the program stops
+        :return:
+        """
         return self.sample_time
 
     def get_regex(self):
+        """
+        Get the regex for filtering data, by default is f'Celda\\s+(\\d+):\\s*(-?\\d+\\.?\\d*)'
+        :return:
+        """
         return self.regex
 
     def set_sample_time(self, sample_time):

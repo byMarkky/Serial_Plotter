@@ -75,7 +75,7 @@ class Toplevel1:
 
         self.BaudTextBox = tk.Entry(self.top)
         self.BaudTextBox.place(relx=0.096, rely=0.133, height=20, relwidth=0.788)
-
+        self.BaudTextBox.insert(END, str(self.config.get_baud_rate()))
         self.BaudTextBox.configure(background="#d9d9d9")
         self.BaudTextBox.configure(disabledforeground="#a3a3a3")
         self.BaudTextBox.configure(exportselection="0")
@@ -149,6 +149,7 @@ class Toplevel1:
 
         self.RegexEntry = tk.Entry(self.top)
         self.RegexEntry.place(relx=0.096, rely=0.5, height=20, relwidth=0.788)
+        self.RegexEntry.insert(END, f"{self.config.get_regex()}")
         self.RegexEntry.configure(background="#d9d9d9")
         self.RegexEntry.configure(disabledforeground="#a3a3a3")
         self.RegexEntry.configure(exportselection="0")
@@ -235,6 +236,7 @@ class Toplevel1:
             self.serial_reader.start()
         except Exception as e:
             messagebox.showerror("Error de conexion", str(e))
+            print("Error: ", str(e))
             return
 
         self.data_window = DataWindow(self.top, self.serial_reader)
