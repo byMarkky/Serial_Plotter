@@ -229,10 +229,7 @@ class Toplevel1:
         print(self.config.__str__())
 
         try:
-            self.serial_reader = SerialReader(
-                self.config.get_port(),
-                self.config.get_baud_rate()
-            )
+            self.serial_reader = SerialReader(self.config)
             self.serial_reader.start()
         except Exception as e:
             messagebox.showerror("Error de conexion", str(e))

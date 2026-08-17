@@ -44,9 +44,10 @@ def read_port(puerto, baud_rate=115200):
             print("Puerto cerrado.")
 
 class SerialReader:
-    def __init__(self, puerto, baud_rate=115200):
-        self.puerto = puerto
-        self.baud_rate = baud_rate
+    def __init__(self, config):
+        self.config = config
+        self.puerto = config.get_port()
+        self.baud_rate = config.get_baud_rate()
         self.data_queue = queue.Queue()
         self._stop_event = threading.Event()
         self.ser = None
@@ -70,7 +71,7 @@ class SerialReader:
         self.thread.start()
 
     def get_temperatures(self, linea):
-        patron = r'Celda\s+(\d+):\s*(-?\d+\.?\d*)'
+        patron = self.config.get_regex()
         coincidencias = re.findall(patron, linea)
         return {int(num): float(temp) for num, temp in coincidencias}
 

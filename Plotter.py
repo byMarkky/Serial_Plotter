@@ -11,6 +11,7 @@ import re
 
 class Plotter:
     def __init__(self, master_frame, serial_reader):
+        self.master_frame = master_frame
         self.config = Config()
         self.data_limit = 20
         self.serial_reader = serial_reader
@@ -86,6 +87,15 @@ class Plotter:
             cache_frame_data=False
         )
         self.canvas.draw()
+
+        if self.config.get_sample_time() > 0:
+            time = self.config.get_sample_time()
+            self.master_frame.after(time * 1000, self._pause_anim())
+
+    def _pause_anim(self):
+        if self.ani:
+            self.ani.event_source.stop()
+        print("Plotting Paused")
 
     def set_config(self, config):
         self.config = config
